@@ -55,6 +55,17 @@
       height: 80px;
       object-fit: cover;
     }
+
+    /* Efeito de escala ao passar o mouse */
+    a {
+      text-decoration: none;
+      color: white;
+      transition: transform 0.2s ease;
+    }
+
+    a:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
@@ -177,7 +188,12 @@
         const topSongsList = document.getElementById('top-songs');
         songs.forEach(song => {
           const li = document.createElement('li');
-          li.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
+          // Cria um link para a música no Spotify
+          const songLink = document.createElement('a');
+          songLink.href = song.external_urls.spotify;  // Link para a música
+          songLink.target = '_blank';  // Abre o link em uma nova aba
+          songLink.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
+          li.appendChild(songLink);  // Adiciona o link à lista
           topSongsList.appendChild(li);
         });
       } catch (error) {
