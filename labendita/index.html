@@ -7,80 +7,87 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        header {
-            background-color: #573215;
-            color: #fff;
-            padding: 15px;
-            text-align: center;
-        }
-        .container {
-            padding: 20px;
+            line-height: 1.6;
+            margin: 20px;
         }
         .card {
-            background: #fff;
-            border-radius: 8px;
+            background: #f4f4f4;
+            margin: 10px 0;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h1, h2, h3 {
-            color: #573215;
+        h1, h2 {
+            color: #333;
         }
-        .team {
-            display: flex;
-            justify-content: space-between;
-        }
-        .score {
-            font-size: 24px;
-            font-weight: bold;
+        strong {
+            color: #555;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Football Match Info</h1>
-    </header>
-    <div class="container">
-        <div id="match-info" class="card">
-            <h2>Match Details</h2>
-            <p><strong>Tournament:</strong> <span id="tournament"></span></p>
-            <p><strong>Season:</strong> <span id="season"></span></p>
-            <p><strong>Round:</strong> <span id="round"></span></p>
-            <p><strong>Status:</strong> <span id="status"></span></p>
-        </div>
-        <div class="card">
-            <h2>Teams</h2>
-            <div class="team">
-                <div>
-                    <h3 id="home-team"></h3>
-                    <p><strong>Manager:</strong> <span id="home-manager"></span></p>
-                </div>
-                <div class="score" id="home-score"></div>
-            </div>
-            <div class="team">
-                <div>
-                    <h3 id="away-team"></h3>
-                    <p><strong>Manager:</strong> <span id="away-manager"></span></p>
-                </div>
-                <div class="score" id="away-score"></div>
-            </div>
-        </div>
-        <div id="venue-info" class="card">
-            <h2>Venue</h2>
-            <p><strong>Stadium:</strong> <span id="stadium"></span></p>
-            <p><strong>City:</strong> <span id="city"></span></p>
-            <p><strong>Capacity:</strong> <span id="capacity"></span></p>
-        </div>
+    <h1>Football Match Details</h1>
+
+    <!-- Torneio e status -->
+    <div id="match-info" class="card">
+        <h2>Match Info</h2>
+        <p><strong>Tournament:</strong> <span id="tournament"></span></p>
+        <p><strong>Season:</strong> <span id="season"></span></p>
+        <p><strong>Round:</strong> <span id="round"></span></p>
+        <p><strong>Status:</strong> <span id="status"></span></p>
     </div>
+
+    <!-- Equipe da casa -->
+    <div id="home-team-info" class="card">
+        <h2>Home Team</h2>
+        <p><strong>Name:</strong> <span id="home-team"></span></p>
+        <p><strong>Manager:</strong> <span id="home-manager"></span></p>
+        <p><strong>Score:</strong> <span id="home-score"></span></p>
+    </div>
+
+    <!-- Equipe visitante -->
+    <div id="away-team-info" class="card">
+        <h2>Away Team</h2>
+        <p><strong>Name:</strong> <span id="away-team"></span></p>
+        <p><strong>Manager:</strong> <span id="away-manager"></span></p>
+        <p><strong>Score:</strong> <span id="away-score"></span></p>
+    </div>
+
+    <!-- Local -->
+    <div id="venue-info" class="card">
+        <h2>Venue</h2>
+        <p><strong>Stadium:</strong> <span id="stadium"></span></p>
+        <p><strong>City:</strong> <span id="city"></span></p>
+        <p><strong>Capacity:</strong> <span id="capacity"></span></p>
+    </div>
+
+    <!-- Tempo da partida -->
+    <div id="time-info" class="card">
+        <h2>Match Time</h2>
+        <p><strong>Current Period Start:</strong> <span id="current-period-start"></span></p>
+        <p><strong>Elapsed Time:</strong> <span id="elapsed-time"></span></p>
+    </div>
+
     <script>
         // URL da API
         const apiUrl = "https://api.sofascore.com/api/v1/event/12375366";
-    
+
+        // Função para calcular o tempo decorrido
+        function calculateElapsedTime(currentPeriodStart, maxTime, extraTime) {
+            const currentTime = Math.floor(Date.now() / 1000); // Tempo atual em segundos
+            let elapsed = currentTime - currentPeriodStart;
+
+            // Verificar se o tempo excede o máximo
+            if (elapsed > maxTime) {
+                elapsed = maxTime + extraTime;
+            }
+
+            // Converter para minutos e segundos
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            return `${minutes}m ${seconds}s`;
+        }
+
         // Função para buscar e exibir os dados
         async function fetchMatchData() {
             try {
@@ -91,31 +98,45 @@
                 const homeTeam = event.homeTeam;
                 const awayTeam = event.awayTeam;
                 const venue = event.venue;
-    
+                const time = event.time;
+
                 // Populando o HTML
                 document.getElementById('tournament').textContent = event.tournament.name;
                 document.getElementById('season').textContent = event.season.name;
                 document.getElementById('round').textContent = event.roundInfo.name;
                 document.getElementById('status').textContent = event.status.description;
-    
+
                 document.getElementById('home-team').textContent = homeTeam.name;
                 document.getElementById('home-manager').textContent = homeTeam.manager.name;
                 document.getElementById('home-score').textContent = event.homeScore.current;
-    
+
                 document.getElementById('away-team').textContent = awayTeam.name;
                 document.getElementById('away-manager').textContent = awayTeam.manager.name;
                 document.getElementById('away-score').textContent = event.awayScore.current;
-    
+
                 document.getElementById('stadium').textContent = venue.name;
                 document.getElementById('city').textContent = venue.city.name;
                 document.getElementById('capacity').textContent = venue.capacity;
+
+                // Tempo da partida
+                const currentPeriodStart = time.currentPeriodStartTimestamp;
+                const maxTime = time.max;
+                const extraTime = time.extra;
+
+                // Exibindo o tempo inicial e calculado
+                document.getElementById('current-period-start').textContent = new Date(currentPeriodStart * 1000).toLocaleTimeString();
+                document.getElementById('elapsed-time').textContent = calculateElapsedTime(currentPeriodStart, maxTime, extraTime);
+
             } catch (error) {
                 console.error("Erro:", error.message);
             }
         }
-    
+
         // Chamada da função ao carregar a página
         fetchMatchData();
-    </script>    
+
+        // Atualizar o tempo decorrido a cada segundo
+        setInterval(fetchMatchData, 1000);
+    </script>
 </body>
 </html>
