@@ -107,8 +107,8 @@
 <body>
   <div class="wrapper">
     <div class="page page1 active">
-      <h1>Bem-vindo à retrospectiva 2024!</h1>
-      <p>Vamos relembrar os momentos incríveis do ano no ARUPlay.</p>
+      <h1>Bem-vindo à reTRANSpectiva 2024!</h1>
+      <p>Vamos relembrar os momentos incríveis do ano?</p>
     </div>
     <div class="page page2">
       <h1>Top 5 Artistas:</h1>
@@ -145,8 +145,8 @@
     // Função de login e obtenção do token do Spotify
     function loginSpotify() {
       const authEndpoint = 'https://accounts.spotify.com/authorize';
-      const clientId = 'YOUR_SPOTIFY_CLIENT_ID'; // Substitua pelo seu Client ID
-      const redirectUri = 'YOUR_REDIRECT_URI'; // Substitua pelo seu Redirect URI
+      const clientId = 'b790c3434bc7438db724f334b4d3ac78'; // Substitua pelo seu Client ID
+      const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva'; // Substitua pelo seu Redirect URI
       const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
 
       window.location.href = authUrl;
