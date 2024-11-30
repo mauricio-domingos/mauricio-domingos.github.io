@@ -56,6 +56,7 @@
       object-fit: cover;
     }
 
+    /* Efeito de escala ao passar o mouse */
     a {
       text-decoration: none;
       color: white;
@@ -64,16 +65,6 @@
 
     a:hover {
       transform: scale(1.1);
-    }
-
-    #score-image {
-      margin-top: 20px;
-      display: none;
-    }
-
-    #downloadLink {
-      margin-top: 20px;
-      display: none;
     }
   </style>
 </head>
@@ -93,13 +84,7 @@
     <ul id="top-songs"></ul>
     <h1>Pontuação Musical</h1>
     <p id="music-score">Carregando...</p>
-
-    <!-- Div para exibir a imagem do Sirv -->
-    <img id="score-image" src="" alt="Pontuação do Usuário">
-
-    <a id="downloadLink" href="#" download="top_music_report.png">
-      <button>Baixar Imagem</button>
-    </a>
+    <p id="custom-message">Aguardando seus dados...</p>
   </div>
 
   <script>
@@ -110,16 +95,7 @@
     const content = document.getElementById('content');
     const userName = document.getElementById('user-name');
     const userImage = document.getElementById('user-image');
-    const topArtistsList = document.getElementById('top-artists');
-    const topSongsList = document.getElementById('top-songs');
-    const musicScoreElement = document.getElementById('music-score');
-    const scoreImage = document.getElementById('score-image');
-    const downloadLink = document.getElementById('downloadLink');
-
-    let topArtists = [];
-    let topSongs = [];
-    let musicScore = 0;
-
+    
     // Função para login com Spotify
     function loginSpotify() {
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
@@ -181,16 +157,16 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        topArtists = data.items;
-
-        topArtistsList.innerHTML = ''; // Limpa a lista antes de adicionar os itens
-        topArtists.forEach(artist => {
+        const artists = data.items;
+        const topArtistsList = document.getElementById('top-artists');
+        artists.forEach(artist => {
           const li = document.createElement('li');
+          // Cria um link para o perfil do artista no Spotify
           const artistLink = document.createElement('a');
-          artistLink.href = artist.external_urls.spotify;
-          artistLink.target = '_blank';
-          artistLink.textContent = artist.name;
-          li.appendChild(artistLink);
+          artistLink.href = artist.external_urls.spotify;  // Link para o perfil do artista
+          artistLink.target = '_blank';  // Abre o link em uma nova aba
+          artistLink.textContent = artist.name;  // Nome do artista
+          li.appendChild(artistLink);  // Adiciona o link à lista
           topArtistsList.appendChild(li);
         });
       } catch (error) {
@@ -208,16 +184,16 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        topSongs = data.items;
-
-        topSongsList.innerHTML = ''; // Limpa a lista antes de adicionar os itens
-        topSongs.forEach(song => {
+        const songs = data.items;
+        const topSongsList = document.getElementById('top-songs');
+        songs.forEach(song => {
           const li = document.createElement('li');
+          // Cria um link para a música no Spotify
           const songLink = document.createElement('a');
-          songLink.href = song.external_urls.spotify;
-          songLink.target = '_blank';
+          songLink.href = song.external_urls.spotify;  // Link para a música
+          songLink.target = '_blank';  // Abre o link em uma nova aba
           songLink.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
-          li.appendChild(songLink);
+          li.appendChild(songLink);  // Adiciona o link à lista
           topSongsList.appendChild(li);
         });
       } catch (error) {
@@ -225,7 +201,7 @@
       }
     }
 
-    // Calcula a pontuação musical
+    // Calcula e exibe a pontuação musical
     async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -235,29 +211,46 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        topArtists = data.items;
+        const artists = data.items;
 
-        musicScore = topArtists.reduce((sum, artist) => sum + artist.popularity, 0);
+        // Calcula a pontuação musical com base na popularidade dos artistas
+        let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
 
+        // Exibe a pontuação musical
+        const musicScoreElement = document.getElementById('music-score');
         musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
 
-        // Formata a pontuação para exibição com zero à esquerda
-        const formattedScore = String(musicScore).padStart(2, '0');
-        const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
-        scoreImage.src = imageUrl;
-        scoreImage.style.display = 'block'; // Exibe a imagem
-
-        // Gera o link para download
-        downloadLink.href = imageUrl;
-        downloadLink.style.display = 'inline-block'; // Exibe o botão de download
+        const customMessage = document.getElementById('custom-message');
+        if (musicScore < 50) {
+          customMessage.textContent = `Você está começando agora! Aumente sua pontuação ouvindo mais música!`;
+        } else if (musicScore >= 50 && musicScore < 150) {
+          customMessage.textContent = `Ótima pontuação! Continue explorando novos artistas!`;
+        } else if (musicScore >= 150 && musicScore < 300) {
+          customMessage.textContent = `Sua pontuação é impressionante! Você já é um verdadeiro fã de música!`;
+        } else {
+          customMessage.textContent = `Você é um expert musical! Sua pontuação é de outro nível!`;
+        }
       } catch (error) {
-        console.error('Erro ao calcular a pontuação:', error);
+        console.error('Erro ao calcular a pontuação musical:', error);
       }
     }
 
-    // Inicia o login ou deslogamento
+    // Função para exibir ou esconder o conteúdo baseado no login
+    function updateContent() {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        loginButton.textContent = 'Sair do Spotify';
+        content.style.display = 'block';
+      } else {
+        loginButton.textContent = 'Entrar com Spotify';
+        content.style.display = 'none';
+      }
+    }
+
+    // Configura o botão de login/logout
     loginButton.addEventListener('click', () => {
-      if (localStorage.getItem(tokenKey)) {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
         logoutSpotify();
       } else {
         loginSpotify();
@@ -267,6 +260,7 @@
     // Verifica o token assim que a página for carregada
     window.onload = () => {
       handleAuthToken();
+      updateContent();
     };
   </script>
 
