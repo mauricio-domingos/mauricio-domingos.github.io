@@ -66,6 +66,11 @@
     a:hover {
       transform: scale(1.1);
     }
+
+    #sirv-image {
+      margin-top: 20px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +90,10 @@
     <h1>Pontuação Musical</h1>
     <p id="music-score">Carregando...</p>
     <p id="custom-message">Aguardando seus dados...</p>
+    
+    <!-- Área para exibir a imagem gerada com a pontuação -->
+    <img id="sirv-image" src="" alt="Imagem com a pontuação">
+    <a id="download-link" href="" download style="color: white;">Baixar Imagem</a>
   </div>
 
   <script>
@@ -95,7 +104,10 @@
     const content = document.getElementById('content');
     const userName = document.getElementById('user-name');
     const userImage = document.getElementById('user-image');
-    
+    const musicScoreElement = document.getElementById('music-score');
+    const sirvImage = document.getElementById('sirv-image');
+    const downloadLink = document.getElementById('download-link');
+
     // Função para login com Spotify
     function loginSpotify() {
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
@@ -201,7 +213,7 @@
       }
     }
 
-    // Calcula e exibe a pontuação musical
+    // Calcula e exibe a pontuação musical e gera a imagem
     async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -217,33 +229,21 @@
         let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
 
         // Exibe a pontuação musical
-        const musicScoreElement = document.getElementById('music-score');
         musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
 
-        const customMessage = document.getElementById('custom-message');
-        if (musicScore < 50) {
-          customMessage.textContent = `Você está começando agora! Aumente sua pontuação ouvindo mais música!`;
-        } else if (musicScore >= 50 && musicScore < 150) {
-          customMessage.textContent = `Ótima pontuação! Continue explorando novos artistas!`;
-        } else if (musicScore >= 150 && musicScore < 300) {
-          customMessage.textContent = `Sua pontuação é impressionante! Você já é um verdadeiro fã de música!`;
-        } else {
-          customMessage.textContent = `Você é um expert musical! Sua pontuação é de outro nível!`;
-        }
+        // Geração da imagem com a pontuação no Sirv
+        const formattedScore = musicScore < 10 ? `0${musicScore}` : musicScore;
+        const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
+
+        // Exibe a imagem gerada
+        sirvImage.src = imageUrl;
+        sirvImage.style.display = 'block';
+
+        // Configura o link para download da imagem
+        downloadLink.href = imageUrl;
+
       } catch (error) {
         console.error('Erro ao calcular a pontuação musical:', error);
-      }
-    }
-
-    // Função para exibir ou esconder o conteúdo baseado no login
-    function updateContent() {
-      const token = localStorage.getItem(tokenKey);
-      if (token) {
-        loginButton.textContent = 'Sair do Spotify';
-        content.style.display = 'block';
-      } else {
-        loginButton.textContent = 'Entrar com Spotify';
-        content.style.display = 'none';
       }
     }
 
