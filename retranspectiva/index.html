@@ -36,16 +36,37 @@
       font-size: 24px;
     }
 
-    #content img {
-      margin: 20px auto;
-      border: 3px solid #1db954;
-      border-radius: 10px;
-      max-width: 300px;
+    #content ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #content li {
+      font-size: 18px;
+    }
+
+    #user-profile {
+      margin-bottom: 20px;
+    }
+
+    #user-profile img {
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+    }
+
+    #shareImage {
+      margin-top: 20px;
       width: 100%;
+      max-width: 400px;
+      border: 2px solid white;
+      border-radius: 10px;
     }
 
     #downloadButton {
       display: block;
+      margin: 10px auto;
       background-color: #1db954;
       color: white;
       border: none;
@@ -53,8 +74,7 @@
       border-radius: 50px;
       font-size: 16px;
       cursor: pointer;
-      text-decoration: none;
-      margin: 10px auto;
+      transition: background 0.3s;
     }
 
     #downloadButton:hover {
@@ -67,10 +87,22 @@
   <button id="loginButton">Entrar com Spotify</button>
 
   <div id="content" style="display: none;">
-    <h1>Sua Pontuação Musical</h1>
+    <div id="user-profile">
+      <img id="user-image" src="" alt="Foto do perfil">
+      <p id="user-name">Olá, Carregando...</p>
+    </div>
+    
+    <h1>Top 5 Artistas</h1>
+    <ul id="top-artists"></ul>
+    <h1>Top 5 Músicas</h1>
+    <ul id="top-songs"></ul>
+    <h1>Pontuação Musical</h1>
     <p id="music-score">Carregando...</p>
-    <img id="score-image" src="" alt="Pontuação Musical">
-    <a id="downloadButton" href="#" download="pontuacao_musical.png">Baixar Imagem</a>
+    <p id="custom-message">Aguardando seus dados...</p>
+
+    <h1>Imagem para Compartilhar</h1>
+    <img id="shareImage" src="" alt="Imagem para compartilhar">
+    <a id="downloadButton" href="" download="Pontuacao_Musical.png">Baixar Imagem</a>
   </div>
 
   <script>
@@ -79,9 +111,11 @@
     const tokenKey = 'spotify_token';
     const loginButton = document.getElementById('loginButton');
     const content = document.getElementById('content');
-    const scoreImage = document.getElementById('score-image');
+    const userName = document.getElementById('user-name');
+    const userImage = document.getElementById('user-image');
+    const shareImage = document.getElementById('shareImage');
     const downloadButton = document.getElementById('downloadButton');
-
+    
     function loginSpotify() {
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
       window.location.href = authUrl;
@@ -101,8 +135,67 @@
         if (token) {
           localStorage.setItem(tokenKey, token);
           window.history.replaceState(null, null, window.location.pathname);
+          loadUserData();
+          loadTopArtists();
+          loadTopSongs();
           calculateMusicScore();
         }
+      }
+    }
+
+    async function loadUserData() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        userName.textContent = `Olá, ${data.display_name}!`;
+        userImage.src = data.images[0]?.url || 'https://via.placeholder.com/80';
+      } catch (error) {
+        console.error('Erro ao carregar os dados do usuário:', error);
+      }
+    }
+
+    async function loadTopArtists() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const topArtistsList = document.getElementById('top-artists');
+        data.items.forEach(artist => {
+          const li = document.createElement('li');
+          li.textContent = artist.name;
+          topArtistsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar os artistas:', error);
+      }
+    }
+
+    async function loadTopSongs() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=5';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const topSongsList = document.getElementById('top-songs');
+        data.items.forEach(song => {
+          const li = document.createElement('li');
+          li.textContent = `${song.name} - ${song.artists[0].name}`;
+          topSongsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar as músicas:', error);
       }
     }
 
@@ -117,21 +210,24 @@
         const data = await response.json();
         const artists = data.items;
 
-        // Calcula a pontuação musical com base na popularidade dos artistas
         let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
 
-        // Formata a pontuação para sempre ter dois dígitos
-        const formattedScore = musicScore < 10 ? `0${musicScore}` : `${musicScore}`;
-
-        // Atualiza a pontuação no site
+        const scoreStr = musicScore < 10 ? `0${musicScore}` : `${musicScore}`;
         const musicScoreElement = document.getElementById('music-score');
-        musicScoreElement.textContent = `Sua pontuação musical é: ${formattedScore}`;
+        musicScoreElement.textContent = `Sua pontuação musical é: ${scoreStr}`;
 
-        // Gera a URL da imagem com a pontuação
-        const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
-        scoreImage.src = imageUrl;
+        const customMessage = document.getElementById('custom-message');
+        if (musicScore < 50) {
+          customMessage.textContent = `Você curte artistas menos populares! Ótimo para explorar novidades.`;
+        } else if (musicScore < 150) {
+          customMessage.textContent = `Um ótimo equilíbrio entre mainstream e alternativo!`;
+        } else {
+          customMessage.textContent = `Você ama o que está no topo! Verdadeiro fã de hits.`;
+        }
 
-        // Atualiza o link de download
+        // Atualiza a imagem da pontuação
+        const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${scoreStr}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
+        shareImage.src = imageUrl;
         downloadButton.href = imageUrl;
       } catch (error) {
         console.error('Erro ao calcular a pontuação musical:', error);
