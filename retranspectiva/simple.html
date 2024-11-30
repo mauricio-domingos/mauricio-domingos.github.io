@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retrospectiva 2024 - ARUPlay</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #loginButton {
+      background-color: #1db954;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #loginButton:hover {
+      background-color: #1ed760;
+    }
+
+    #content {
+      margin-top: 20px;
+    }
+
+    #content h1 {
+      font-size: 24px;
+    }
+
+    #content ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #content li {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="loginButton">Entrar com Spotify</button>
+
+  <div id="content" style="display: none;">
+    <h1>Top 5 Artistas</h1>
+    <ul id="top-artists"></ul>
+    <h1>Top 5 Músicas</h1>
+    <ul id="top-songs"></ul>
+    <h1>Tempo Total Ouvido</h1>
+    <p id="total-time">Carregando...</p>
+    <p id="custom-message">Aguardando seus dados...</p>
+  </div>
+
+  <script>
+    const clientId = 'b790c3434bc7438db724f334b4d3ac78'; 
+    const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva';
+    const tokenKey = 'spotify_token';
+    const loginButton = document.getElementById('loginButton');
+    const content = document.getElementById('content');
+    
+    // Função para login com Spotify
+    function loginSpotify() {
+      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
+      window.location.href = authUrl;
+    }
+
+    // Função para deslogar
+    function logoutSpotify() {
+      localStorage.removeItem(tokenKey);
+      window.location.reload(); // Recarrega a página
+    }
+
+    // Verifica e armazena o token da URL
+    function handleAuthToken() {
+      const hash = window.location.hash;
+      if (hash) {
+        const params = new URLSearchParams(hash.substr(1));
+        const token = params.get('access_token');
+
+        if (token) {
+          localStorage.setItem(tokenKey, token);
+          window.history.replaceState(null, null, window.location.pathname); // Limpa a URL
+          loadTopArtists();
+          loadTopSongs();
+          loadTotalTime();
+        }
+      }
+    }
+
+    // Carrega o Top 5 Artistas
+    async function loadTopArtists() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const artists = data.items;
+        const topArtistsList = document.getElementById('top-artists');
+        artists.forEach(artist => {
+          const li = document.createElement('li');
+          li.textContent = artist.name;
+          topArtistsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar os artistas:', error);
+      }
+    }
+
+    // Carrega o Top 5 Músicas
+    async function loadTopSongs() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=5';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const songs = data.items;
+        const topSongsList = document.getElementById('top-songs');
+        songs.forEach(song => {
+          const li = document.createElement('li');
+          li.textContent = song.name;
+          topSongsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar as músicas:', error);
+      }
+    }
+
+    // Carrega o tempo total ouvido e exibe mensagens
+    async function loadTotalTime() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const totalMinutes = data.items.reduce((sum, artist) => sum + artist.popularity, 0);
+        
+        const totalTime = document.getElementById('total-time');
+        totalTime.textContent = `${totalMinutes} minutos`;
+
+        // Calculando o tempo em dias
+        const totalDays = Math.floor(totalMinutes / (60 * 24));
+        const customMessage = document.getElementById('custom-message');
+        if (totalDays < 10) {
+          customMessage.textContent = `Você ouviu música por ${totalDays} dias! Uau, foi rápido, hein!`;
+        } else if (totalDays >= 10 && totalDays <= 30) {
+          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Você ama música, não é?`;
+        } else if (totalDays > 30 && totalDays <= 60) {
+          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Não cansou não?`;
+        } else {
+          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Vai lá no currículo e coloca: ouvidor profissional de divas pop.`;
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o tempo total:', error);
+      }
+    }
+
+    // Função para exibir ou esconder o conteúdo baseado no login
+    function updateContent() {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        loginButton.textContent = 'Sair do Spotify';
+        content.style.display = 'block';
+      } else {
+        loginButton.textContent = 'Entrar com Spotify';
+        content.style.display = 'none';
+      }
+    }
+
+    // Configura o botão de login/logout
+    loginButton.addEventListener('click', () => {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        logoutSpotify();
+      } else {
+        loginSpotify();
+      }
+    });
+
+    // Verifica o token assim que a página for carregada
+    window.onload = () => {
+      handleAuthToken();
+      updateContent();
+    };
+  </script>
+
+</body>
+</html>
