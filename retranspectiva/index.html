@@ -159,7 +159,7 @@
     // Função de login e obtenção do token do Spotify
     function loginSpotify() {
       const clientId = 'b790c3434bc7438db724f334b4d3ac78'; // Substitua pelo seu Client ID
-      const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva/'; // Substitua pelo seu Redirect URI
+      const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva'; // Substitua pelo seu Redirect URI
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
 
       window.location.href = authUrl;
