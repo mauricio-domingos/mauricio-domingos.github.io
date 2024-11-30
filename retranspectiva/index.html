@@ -55,47 +55,6 @@
       height: 80px;
       object-fit: cover;
     }
-
-    #artist-popup, #song-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 10px;
-      display: none;
-      z-index: 9999;
-    }
-
-    #popup-content {
-      text-align: center;
-    }
-
-    #popup-artist-cover, #popup-song-cover {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-    #popup-spotify-button {
-      background-color: #1db954;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    #popup-spotify-button:hover {
-      background-color: #1ed760;
-    }
-
-    .top-list-item {
-      position: relative;
-    }
   </style>
 </head>
 <body>
@@ -107,38 +66,14 @@
       <img id="user-image" src="" alt="Foto do perfil">
       <p id="user-name">Olá, Carregando...</p>
     </div>
-
+    
     <h1>Top 5 Artistas</h1>
     <ul id="top-artists"></ul>
-
     <h1>Top 5 Músicas</h1>
     <ul id="top-songs"></ul>
-
     <h1>Pontuação Musical</h1>
     <p id="music-score">Carregando...</p>
-
-    <div id="share-image">
-      <img id="score-image" src="" alt="Pontuação Musical">
-    </div>
-  </div>
-
-  <div id="artist-popup">
-    <div id="popup-content">
-      <img id="popup-artist-cover" src="" alt="Artist Cover">
-      <p id="popup-artist-name"></p>
-      <p id="popup-artist-popularity"></p>
-      <button id="popup-spotify-button">Ouvir no Spotify</button>
-    </div>
-  </div>
-
-  <div id="song-popup">
-    <div id="popup-content">
-      <img id="popup-song-cover" src="" alt="Song Cover">
-      <p id="popup-song-name"></p>
-      <p id="popup-song-artist"></p>
-      <p id="popup-song-popularity"></p>
-      <button id="popup-spotify-button">Ouvir no Spotify</button>
-    </div>
+    <p id="custom-message">Aguardando seus dados...</p>
   </div>
 
   <script>
@@ -149,20 +84,20 @@
     const content = document.getElementById('content');
     const userName = document.getElementById('user-name');
     const userImage = document.getElementById('user-image');
-    const scoreImage = document.getElementById('score-image');
-    const topArtistsList = document.getElementById('top-artists');
-    const topSongsList = document.getElementById('top-songs');
-
+    
+    // Função para login com Spotify
     function loginSpotify() {
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
       window.location.href = authUrl;
     }
 
+    // Função para deslogar
     function logoutSpotify() {
       localStorage.removeItem(tokenKey);
-      window.location.reload();
+      window.location.reload(); // Recarrega a página
     }
 
+    // Verifica e armazena o token da URL
     function handleAuthToken() {
       const hash = window.location.hash;
       if (hash) {
@@ -171,7 +106,7 @@
 
         if (token) {
           localStorage.setItem(tokenKey, token);
-          window.history.replaceState(null, null, window.location.pathname);
+          window.history.replaceState(null, null, window.location.pathname); // Limpa a URL
           loadUserData();
           loadTopArtists();
           loadTopSongs();
@@ -180,6 +115,7 @@
       }
     }
 
+    // Carrega os dados do usuário (nome e foto de perfil)
     async function loadUserData() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me';
@@ -190,15 +126,17 @@
         });
         const data = await response.json();
         const user = data;
-
+        
+        // Exibe nome e foto do perfil
         userName.textContent = `Olá, ${user.display_name}!`;
-        userImage.src = user.images[0]?.url || 'https://via.placeholder.com/80';
+        userImage.src = user.images[0]?.url || 'https://via.placeholder.com/80'; // Foto de perfil, com imagem padrão caso não tenha
 
       } catch (error) {
         console.error('Erro ao carregar os dados do usuário:', error);
       }
     }
 
+    // Carrega os Top 5 Artistas
     async function loadTopArtists() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -209,16 +147,15 @@
         });
         const data = await response.json();
         const artists = data.items;
-
+        const topArtistsList = document.getElementById('top-artists');
         artists.forEach(artist => {
           const li = document.createElement('li');
-          li.classList.add('top-list-item');
-          const artistText = `${artist.name}`;
-          li.textContent = artistText;
-
-          li.addEventListener('mouseenter', () => showArtistPopup(artist));
-          li.addEventListener('mouseleave', hidePopup);
-
+          // Cria um link para o perfil do artista no Spotify
+          const artistLink = document.createElement('a');
+          artistLink.href = artist.external_urls.spotify;  // Link para o perfil do artista
+          artistLink.target = '_blank';  // Abre o link em uma nova aba
+          artistLink.textContent = artist.name;  // Nome do artista
+          li.appendChild(artistLink);  // Adiciona o link à lista
           topArtistsList.appendChild(li);
         });
       } catch (error) {
@@ -226,6 +163,7 @@
       }
     }
 
+    // Carrega os Top 5 Músicas
     async function loadTopSongs() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=5';
@@ -236,15 +174,10 @@
         });
         const data = await response.json();
         const songs = data.items;
-
+        const topSongsList = document.getElementById('top-songs');
         songs.forEach(song => {
           const li = document.createElement('li');
-          const songText = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
-          li.textContent = songText;
-
-          li.addEventListener('mouseenter', () => showSongPopup(song));
-          li.addEventListener('mouseleave', hidePopup);
-
+          li.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
           topSongsList.appendChild(li);
         });
       } catch (error) {
@@ -252,6 +185,7 @@
       }
     }
 
+    // Calcula e exibe a pontuação musical
     async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -263,62 +197,56 @@
         const data = await response.json();
         const artists = data.items;
 
+        // Calcula a pontuação musical com base na popularidade dos artistas
         let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
 
+        // Exibe a pontuação musical
         const musicScoreElement = document.getElementById('music-score');
         musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
 
-        generateScoreImage(musicScore);
+        const customMessage = document.getElementById('custom-message');
+        if (musicScore < 50) {
+          customMessage.textContent = `Você está começando agora! Aumente sua pontuação ouvindo mais música!`;
+        } else if (musicScore >= 50 && musicScore < 150) {
+          customMessage.textContent = `Ótima pontuação! Continue explorando novos artistas!`;
+        } else if (musicScore >= 150 && musicScore < 300) {
+          customMessage.textContent = `Sua pontuação é impressionante! Você já é um verdadeiro fã de música!`;
+        } else {
+          customMessage.textContent = `Você é um expert musical! Sua pontuação é de outro nível!`;
+        }
       } catch (error) {
         console.error('Erro ao calcular a pontuação musical:', error);
       }
     }
 
-    function generateScoreImage(score) {
-      const formattedScore = score < 10 ? `0${score}` : score;
-      scoreImage.src = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
+    // Função para exibir ou esconder o conteúdo baseado no login
+    function updateContent() {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        loginButton.textContent = 'Sair do Spotify';
+        content.style.display = 'block';
+      } else {
+        loginButton.textContent = 'Entrar com Spotify';
+        content.style.display = 'none';
+      }
     }
 
-    function showArtistPopup(artist) {
-      const popup = document.getElementById('artist-popup');
-      const cover = document.getElementById('popup-artist-cover');
-      const name = document.getElementById('popup-artist-name');
-      const popularity = document.getElementById('popup-artist-popularity');
-      const spotifyButton = document.getElementById('popup-spotify-button');
+    // Configura o botão de login/logout
+    loginButton.addEventListener('click', () => {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        logoutSpotify();
+      } else {
+        loginSpotify();
+      }
+    });
 
-      cover.src = artist.images[0]?.url || 'https://via.placeholder.com/150';
-      name.textContent = artist.name;
-      popularity.textContent = `Popularidade: ${artist.popularity}`;
-      spotifyButton.onclick = () => window.open(artist.external_urls.spotify, '_blank');
-
-      popup.style.display = 'block';
-    }
-
-    function showSongPopup(song) {
-      const popup = document.getElementById('song-popup');
-      const cover = document.getElementById('popup-song-cover');
-      const songName = document.getElementById('popup-song-name');
-      const songArtist = document.getElementById('popup-song-artist');
-      const songPopularity = document.getElementById('popup-song-popularity');
-      const spotifyButton = document.getElementById('popup-spotify-button');
-
-      cover.src = song.album.images[0]?.url || 'https://via.placeholder.com/150';
-      songName.textContent = song.name;
-      songArtist.textContent = song.artists.map(artist => artist.name).join(', ');
-      songPopularity.textContent = `Popularidade: ${song.popularity}`;
-      spotifyButton.onclick = () => window.open(song.external_urls.spotify, '_blank');
-
-      popup.style.display = 'block';
-    }
-
-    function hidePopup() {
-      document.getElementById('artist-popup').style.display = 'none';
-      document.getElementById('song-popup').style.display = 'none';
-    }
-
-    handleAuthToken();
-
-    loginButton.addEventListener('click', loginSpotify);
+    // Verifica o token assim que a página for carregada
+    window.onload = () => {
+      handleAuthToken();
+      updateContent();
+    };
   </script>
+
 </body>
 </html>
