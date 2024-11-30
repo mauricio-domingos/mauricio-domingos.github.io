@@ -255,6 +255,7 @@
     });
 
     window.onload = () => {
+      localStorage.removeItem(tokenKey); // Remove o token ao carregar a página
       handleAuthToken();
       updateContent();
     };
