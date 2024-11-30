@@ -71,8 +71,8 @@
     <ul id="top-artists"></ul>
     <h1>Top 5 Músicas</h1>
     <ul id="top-songs"></ul>
-    <h1>Tempo Total Ouvido</h1>
-    <p id="total-time">Carregando...</p>
+    <h1>Pontuação Musical</h1>
+    <p id="music-score">Carregando...</p>
     <p id="custom-message">Aguardando seus dados...</p>
   </div>
 
@@ -110,7 +110,7 @@
           loadUserData();
           loadTopArtists();
           loadTopSongs();
-          loadTotalTime();
+          calculateMusicScore();
         }
       }
     }
@@ -180,8 +180,8 @@
       }
     }
 
-    // Carrega o tempo total ouvido e exibe mensagens
-    async function loadTotalTime() {
+    // Calcula e exibe a pontuação musical
+    async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
 
@@ -190,25 +190,27 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
-        const totalMinutes = data.items.reduce((sum, artist) => sum + artist.popularity, 0);
-        
-        const totalTime = document.getElementById('total-time');
-        totalTime.textContent = `${totalMinutes} minutos`;
+        const artists = data.items;
 
-        // Calculando o tempo em dias
-        const totalDays = Math.floor(totalMinutes / (60 * 24));
+        // Calcula a pontuação musical com base na popularidade dos artistas
+        let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
+
+        // Exibe a pontuação musical
+        const musicScoreElement = document.getElementById('music-score');
+        musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
+
         const customMessage = document.getElementById('custom-message');
-        if (totalDays < 10) {
-          customMessage.textContent = `Você ouviu música por ${totalDays} dias! Uau, foi rápido, hein!`;
-        } else if (totalDays >= 10 && totalDays <= 30) {
-          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Você ama música, não é?`;
-        } else if (totalDays > 30 && totalDays <= 60) {
-          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Não cansou não?`;
+        if (musicScore < 50) {
+          customMessage.textContent = `Você está começando agora! Aumente sua pontuação ouvindo mais música!`;
+        } else if (musicScore >= 50 && musicScore < 150) {
+          customMessage.textContent = `Ótima pontuação! Continue explorando novos artistas!`;
+        } else if (musicScore >= 150 && musicScore < 300) {
+          customMessage.textContent = `Sua pontuação é impressionante! Você já é um verdadeiro fã de música!`;
         } else {
-          customMessage.textContent = `Isso duraria ${totalDays} dias ouvindo sem parar! Vai lá no currículo e coloca: ouvidor profissional de divas pop.`;
+          customMessage.textContent = `Você é um expert musical! Sua pontuação é de outro nível!`;
         }
       } catch (error) {
-        console.error('Erro ao carregar o tempo total:', error);
+        console.error('Erro ao calcular a pontuação musical:', error);
       }
     }
 
