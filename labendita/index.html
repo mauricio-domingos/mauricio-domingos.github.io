@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Match Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #573215;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #573215;
+        }
+        .team {
+            display: flex;
+            justify-content: space-between;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Football Match Info</h1>
+    </header>
+    <div class="container">
+        <div id="match-info" class="card">
+            <h2>Match Details</h2>
+            <p><strong>Tournament:</strong> <span id="tournament"></span></p>
+            <p><strong>Season:</strong> <span id="season"></span></p>
+            <p><strong>Round:</strong> <span id="round"></span></p>
+            <p><strong>Status:</strong> <span id="status"></span></p>
+        </div>
+        <div class="card">
+            <h2>Teams</h2>
+            <div class="team">
+                <div>
+                    <h3 id="home-team"></h3>
+                    <p><strong>Manager:</strong> <span id="home-manager"></span></p>
+                </div>
+                <div class="score" id="home-score"></div>
+            </div>
+            <div class="team">
+                <div>
+                    <h3 id="away-team"></h3>
+                    <p><strong>Manager:</strong> <span id="away-manager"></span></p>
+                </div>
+                <div class="score" id="away-score"></div>
+            </div>
+        </div>
+        <div id="venue-info" class="card">
+            <h2>Venue</h2>
+            <p><strong>Stadium:</strong> <span id="stadium"></span></p>
+            <p><strong>City:</strong> <span id="city"></span></p>
+            <p><strong>Capacity:</strong> <span id="capacity"></span></p>
+        </div>
+    </div>
+    <script>
+        // URL da API
+        const apiUrl = "https://api.sofascore.com/api/v1/event/12375366";
+    
+        // Função para buscar e exibir os dados
+        async function fetchMatchData() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Erro ao buscar dados da API.");
+                const data = await response.json();
+                const event = data.event;
+                const homeTeam = event.homeTeam;
+                const awayTeam = event.awayTeam;
+                const venue = event.venue;
+    
+                // Populando o HTML
+                document.getElementById('tournament').textContent = event.tournament.name;
+                document.getElementById('season').textContent = event.season.name;
+                document.getElementById('round').textContent = event.roundInfo.name;
+                document.getElementById('status').textContent = event.status.description;
+    
+                document.getElementById('home-team').textContent = homeTeam.name;
+                document.getElementById('home-manager').textContent = homeTeam.manager.name;
+                document.getElementById('home-score').textContent = event.homeScore.current;
+    
+                document.getElementById('away-team').textContent = awayTeam.name;
+                document.getElementById('away-manager').textContent = awayTeam.manager.name;
+                document.getElementById('away-score').textContent = event.awayScore.current;
+    
+                document.getElementById('stadium').textContent = venue.name;
+                document.getElementById('city').textContent = venue.city.name;
+                document.getElementById('capacity').textContent = venue.capacity;
+            } catch (error) {
+                console.error("Erro:", error.message);
+            }
+        }
+    
+        // Chamada da função ao carregar a página
+        fetchMatchData();
+    </script>    
+</body>
+</html>
