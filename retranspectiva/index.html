@@ -3,75 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top 5 Artistas do Spotify</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1DB954;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        #artists {
-            list-style-type: none;
-            padding: 0;
-        }
-        #artists li {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-    </style>
+    <title>Minha Retrospectiva Spotify</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Top 5 Artistas Mais Ouvidos no Spotify</h1>
-    <button id="login">Login com Spotify</button>
-    <ul id="artists"></ul>
+    <div class="container">
+        <div class="page" id="page1">
+            <h1>🎶 Sua Retrospectiva 2024</h1>
+            <p>O que você mais ouviu esse ano? Vamos ver!</p>
+            <button class="next-btn" onclick="loginSpotify()">Login com Spotify</button>
+        </div>
 
-    <script>
-        const clientId = 'b790c3434bc7438db724f334b4d3ac78';
-        const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva';
-        const authEndpoint = 'https://accounts.spotify.com/authorize';
-        const apiEndpoint = 'https://api.spotify.com/v1/me/top/artists';
+        <div class="page" id="page2">
+            <h2>Top 5 Artistas</h2>
+            <ul id="top-artists"></ul>
+            <button class="next-btn" onclick="nextPage(3)">Top 5 Músicas</button>
+        </div>
 
-        let token = '';
+        <div class="page" id="page3">
+            <h2>Top 5 Músicas</h2>
+            <ul id="top-songs"></ul>
+            <button class="next-btn" onclick="nextPage(4)">Veja o Gráfico de Gêneros</button>
+        </div>
 
-        document.getElementById('login').addEventListener('click', () => {
-            const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
-            window.location.href = authUrl;
-        });
+        <div class="page" id="page4">
+            <h2>Seus Gêneros Favoritos</h2>
+            <div id="genre-graph"></div>
+            <button class="next-btn" onclick="nextPage(5)">Feliz 2024!</button>
+        </div>
 
-        // Verificar o token no URL após redirecionamento
-        window.onload = () => {
-            if (window.location.hash) {
-                const params = new URLSearchParams(window.location.hash.substr(1));
-                token = params.get('access_token');
-                if (token) {
-                    getTopArtists();
-                }
-            }
-        };
+        <div class="page" id="page5">
+            <h2>Obrigado por usar o Spotify!</h2>
+            <p>Continue a explorar sua música favorita!</p>
+            <button class="next-btn" onclick="nextPage(1)">Voltar ao Início</button>
+        </div>
+    </div>
 
-        // Função para pegar os 5 artistas mais ouvidos
-        async function getTopArtists() {
-            try {
-                const response = await fetch(apiEndpoint, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
-                const artists = data.items.slice(0, 5);  // Pega os top 5
-
-                const artistsList = document.getElementById('artists');
-                artists.forEach(artist => {
-                    const li = document.createElement('li');
-                    li.textContent = artist.name;
-                    artistsList.appendChild(li);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar os artistas', error);
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
