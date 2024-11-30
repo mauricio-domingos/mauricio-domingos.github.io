@@ -15,6 +15,7 @@
       align-items: center;
       height: 100vh;
       overflow: hidden;
+      position: relative; /* Necessário para o botão fixo */
     }
 
     .wrapper {
@@ -70,7 +71,9 @@
 
     #loginButton {
       position: absolute;
-      bottom: 80px; /* Botão mais acima */
+      top: 20px; /* Posiciona o botão no topo da tela */
+      left: 50%;
+      transform: translateX(-50%);
       background-color: #1db954;
       color: white;
       border: none;
@@ -80,6 +83,7 @@
       cursor: pointer;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
       transition: background 0.3s ease;
+      z-index: 10; /* Garante que o botão fique sobre as páginas */
     }
 
     #loginButton:hover {
@@ -117,7 +121,6 @@
     <div class="page page1 active">
       <h1>Bem-vindo à retrospectiva 2024!</h1>
       <p>Vamos relembrar os momentos incríveis do ano no ARUPlay.</p>
-      <button id="loginButton">Entrar com Spotify</button>
     </div>
     <div class="page page2">
       <h1>Top 5 Artistas:</h1>
@@ -143,6 +146,8 @@
     <button id="nextButton">Próximo</button>
   </div>
 
+  <button id="loginButton">Entrar com Spotify</button>
+
   <script>
     const loginButton = document.getElementById('loginButton');
     const nextButton = document.getElementById('nextButton');
@@ -158,6 +163,12 @@
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
 
       window.location.href = authUrl;
+    }
+
+    // Função para deslogar (remover o token)
+    function logoutSpotify() {
+      localStorage.removeItem(tokenKey);
+      window.location.reload(); // Recarrega a página para mostrar o estado atualizado
     }
 
     // Função para exibir a página
@@ -287,11 +298,21 @@
       }
     }
 
-    // Verifica o token assim que a página carregar
+    // Verifica se o token está presente assim que a página carregar
     window.onload = handleAuthToken;
-    
-    // Inicia a primeira página
+
+    // Inicializa a primeira página
     showPage(0);
+
+    // Configura o botão de login/logout
+    loginButton.addEventListener('click', () => {
+      const token = localStorage.getItem(tokenKey);
+      if (token) {
+        logoutSpotify(); // Se estiver logado, desloga
+      } else {
+        loginSpotify(); // Se não estiver logado, faz login
+      }
+    });
   </script>
 </body>
 </html>
