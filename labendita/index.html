@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Match Info</title>
+    <title>Detalhes da Partida</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,46 +26,46 @@
     </style>
 </head>
 <body>
-    <h1>Football Match Details</h1>
+    <h1>Detalhes da Partida</h1>
 
     <!-- Torneio e status -->
     <div id="match-info" class="card">
-        <h2>Match Info</h2>
-        <p><strong>Tournament:</strong> <span id="tournament"></span></p>
-        <p><strong>Season:</strong> <span id="season"></span></p>
-        <p><strong>Round:</strong> <span id="round"></span></p>
+        <h2>Informações da Partida</h2>
+        <p><strong>Torneio:</strong> <span id="tournament"></span></p>
+        <p><strong>Temporada:</strong> <span id="season"></span></p>
+        <p><strong>Rodada:</strong> <span id="round"></span></p>
         <p><strong>Status:</strong> <span id="status"></span></p>
     </div>
 
     <!-- Equipe da casa -->
     <div id="home-team-info" class="card">
-        <h2>Home Team</h2>
-        <p><strong>Name:</strong> <span id="home-team"></span></p>
-        <p><strong>Manager:</strong> <span id="home-manager"></span></p>
-        <p><strong>Score:</strong> <span id="home-score"></span></p>
+        <h2>Equipe da Casa</h2>
+        <p><strong>Nome:</strong> <span id="home-team"></span></p>
+        <p><strong>Técnico:</strong> <span id="home-manager"></span></p>
+        <p><strong>Placar:</strong> <span id="home-score"></span></p>
     </div>
 
     <!-- Equipe visitante -->
     <div id="away-team-info" class="card">
-        <h2>Away Team</h2>
-        <p><strong>Name:</strong> <span id="away-team"></span></p>
-        <p><strong>Manager:</strong> <span id="away-manager"></span></p>
-        <p><strong>Score:</strong> <span id="away-score"></span></p>
+        <h2>Equipe Visitante</h2>
+        <p><strong>Nome:</strong> <span id="away-team"></span></p>
+        <p><strong>Técnico:</strong> <span id="away-manager"></span></p>
+        <p><strong>Placar:</strong> <span id="away-score"></span></p>
     </div>
 
     <!-- Local -->
     <div id="venue-info" class="card">
-        <h2>Venue</h2>
-        <p><strong>Stadium:</strong> <span id="stadium"></span></p>
-        <p><strong>City:</strong> <span id="city"></span></p>
-        <p><strong>Capacity:</strong> <span id="capacity"></span></p>
+        <h2>Local da Partida</h2>
+        <p><strong>Estádio:</strong> <span id="stadium"></span></p>
+        <p><strong>Cidade:</strong> <span id="city"></span></p>
+        <p><strong>Capacidade:</strong> <span id="capacity"></span></p>
     </div>
 
     <!-- Tempo da partida -->
     <div id="time-info" class="card">
-        <h2>Match Time</h2>
-        <p><strong>Current Period Start:</strong> <span id="current-period-start"></span></p>
-        <p><strong>Elapsed Time:</strong> <span id="elapsed-time"></span></p>
+        <h2>Tempo da Partida</h2>
+        <p><strong>Início do Período Atual:</strong> <span id="current-period-start"></span></p>
+        <p><strong>Tempo Decorrido:</strong> <span id="elapsed-time"></span></p>
     </div>
 
     <script>
@@ -73,59 +73,59 @@
         const apiUrl = "https://api.sofascore.com/api/v1/event/12375366";
 
         // Função para calcular o tempo decorrido
-        function calculateElapsedTime(currentPeriodStart, maxTime, extraTime) {
-            const currentTime = Math.floor(Date.now() / 1000); // Tempo atual em segundos
-            let elapsed = currentTime - currentPeriodStart;
+        function calcularTempoDecorrido(inicioPeriodoAtual, tempoMaximo, tempoExtra) {
+            const tempoAtual = Math.floor(Date.now() / 1000); // Tempo atual em segundos
+            let tempoDecorrido = tempoAtual - inicioPeriodoAtual;
 
             // Verificar se o tempo excede o máximo
-            if (elapsed > maxTime) {
-                elapsed = maxTime + extraTime;
+            if (tempoDecorrido > tempoMaximo) {
+                tempoDecorrido = tempoMaximo + tempoExtra;
             }
 
             // Converter para minutos e segundos
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            return `${minutes}m ${seconds}s`;
+            const minutos = Math.floor(tempoDecorrido / 60);
+            const segundos = tempoDecorrido % 60;
+            return `${minutos}m ${segundos}s`;
         }
 
         // Função para buscar e exibir os dados
-        async function fetchMatchData() {
+        async function buscarDadosPartida() {
             try {
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error("Erro ao buscar dados da API.");
                 const data = await response.json();
-                const event = data.event;
-                const homeTeam = event.homeTeam;
-                const awayTeam = event.awayTeam;
-                const venue = event.venue;
-                const time = event.time;
+                const evento = data.event;
+                const equipeCasa = evento.homeTeam;
+                const equipeVisitante = evento.awayTeam;
+                const local = evento.venue;
+                const tempo = evento.time;
 
                 // Populando o HTML
-                document.getElementById('tournament').textContent = event.tournament.name;
-                document.getElementById('season').textContent = event.season.name;
-                document.getElementById('round').textContent = event.roundInfo.name;
-                document.getElementById('status').textContent = event.status.description;
+                document.getElementById('tournament').textContent = evento.tournament.name;
+                document.getElementById('season').textContent = evento.season.name;
+                document.getElementById('round').textContent = evento.roundInfo.name;
+                document.getElementById('status').textContent = evento.status.description;
 
-                document.getElementById('home-team').textContent = homeTeam.name;
-                document.getElementById('home-manager').textContent = homeTeam.manager.name;
-                document.getElementById('home-score').textContent = event.homeScore.current;
+                document.getElementById('home-team').textContent = equipeCasa.name;
+                document.getElementById('home-manager').textContent = equipeCasa.manager.name;
+                document.getElementById('home-score').textContent = evento.homeScore.current;
 
-                document.getElementById('away-team').textContent = awayTeam.name;
-                document.getElementById('away-manager').textContent = awayTeam.manager.name;
-                document.getElementById('away-score').textContent = event.awayScore.current;
+                document.getElementById('away-team').textContent = equipeVisitante.name;
+                document.getElementById('away-manager').textContent = equipeVisitante.manager.name;
+                document.getElementById('away-score').textContent = evento.awayScore.current;
 
-                document.getElementById('stadium').textContent = venue.name;
-                document.getElementById('city').textContent = venue.city.name;
-                document.getElementById('capacity').textContent = venue.capacity;
+                document.getElementById('stadium').textContent = local.name;
+                document.getElementById('city').textContent = local.city.name;
+                document.getElementById('capacity').textContent = local.capacity;
 
                 // Tempo da partida
-                const currentPeriodStart = time.currentPeriodStartTimestamp;
-                const maxTime = time.max;
-                const extraTime = time.extra;
+                const inicioPeriodoAtual = tempo.currentPeriodStartTimestamp;
+                const tempoMaximo = tempo.max;
+                const tempoExtra = tempo.extra;
 
                 // Exibindo o tempo inicial e calculado
-                document.getElementById('current-period-start').textContent = new Date(currentPeriodStart * 1000).toLocaleTimeString();
-                document.getElementById('elapsed-time').textContent = calculateElapsedTime(currentPeriodStart, maxTime, extraTime);
+                document.getElementById('current-period-start').textContent = new Date(inicioPeriodoAtual * 1000).toLocaleTimeString();
+                document.getElementById('elapsed-time').textContent = calcularTempoDecorrido(inicioPeriodoAtual, tempoMaximo, tempoExtra);
 
             } catch (error) {
                 console.error("Erro:", error.message);
@@ -133,10 +133,10 @@
         }
 
         // Chamada da função ao carregar a página
-        fetchMatchData();
+        buscarDadosPartida();
 
         // Atualizar o tempo decorrido a cada segundo
-        setInterval(fetchMatchData, 1000);
+        setInterval(buscarDadosPartida, 1000);
     </script>
 </body>
 </html>
