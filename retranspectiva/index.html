@@ -244,15 +244,14 @@
         // Formata a pontuação para exibição com zero à esquerda
         const formattedScore = String(musicScore).padStart(2, '0');
         const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
-
-        // Exibe a imagem com a pontuação
         scoreImage.src = imageUrl;
-        scoreImage.style.display = 'block';
+        scoreImage.style.display = 'block'; // Exibe a imagem
 
-        // Exibe o botão para download
-        downloadLink.style.display = 'inline';
+        // Gera o link para download
+        downloadLink.href = imageUrl;
+        downloadLink.style.display = 'inline-block'; // Exibe o botão de download
       } catch (error) {
-        console.error('Erro ao calcular a pontuação musical:', error);
+        console.error('Erro ao calcular a pontuação:', error);
       }
     }
 
