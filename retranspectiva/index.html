@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 5 Artistas do Spotify</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1DB954;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        #artists {
+            list-style-type: none;
+            padding: 0;
+        }
+        #artists li {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top 5 Artistas Mais Ouvidos no Spotify</h1>
+    <button id="login">Login com Spotify</button>
+    <ul id="artists"></ul>
+
+    <script>
+        const clientId = 'b790c3434bc7438db724f334b4d3ac78';
+        const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva';
+        const authEndpoint = 'https://accounts.spotify.com/authorize';
+        const apiEndpoint = 'https://api.spotify.com/v1/me/top/artists';
+
+        let token = '';
+
+        document.getElementById('login').addEventListener('click', () => {
+            const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
+            window.location.href = authUrl;
+        });
+
+        // Verificar o token no URL após redirecionamento
+        window.onload = () => {
+            if (window.location.hash) {
+                const params = new URLSearchParams(window.location.hash.substr(1));
+                token = params.get('access_token');
+                if (token) {
+                    getTopArtists();
+                }
+            }
+        };
+
+        // Função para pegar os 5 artistas mais ouvidos
+        async function getTopArtists() {
+            try {
+                const response = await fetch(apiEndpoint, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                const artists = data.items.slice(0, 5);  // Pega os top 5
+
+                const artistsList = document.getElementById('artists');
+                artists.forEach(artist => {
+                    const li = document.createElement('li');
+                    li.textContent = artist.name;
+                    artistsList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar os artistas', error);
+            }
+        }
+    </script>
+</body>
+</html>
