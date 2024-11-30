@@ -154,27 +154,11 @@
     // Função de login e obtenção do token do Spotify
     function loginSpotify() {
       const clientId = 'b790c3434bc7438db724f334b4d3ac78'; // Substitua pelo seu Client ID
-      const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva'; // Substitua pelo seu Redirect URI
+      const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva/'; // Substitua pelo seu Redirect URI
       const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
 
       window.location.href = authUrl;
     }
-
-    // Função para obter o token da URL após o login
-    window.onload = () => {
-      if (window.location.hash) {
-        const params = new URLSearchParams(window.location.hash.substr(1));
-        const token = params.get('access_token');
-        
-        if (token) {
-          localStorage.setItem(tokenKey, token);
-          showPage(currentPage);
-          loadTopArtists();
-          loadTopSongs();
-          loadTotalTime();
-        }
-      }
-    };
 
     // Função para exibir a página
     function showPage(index) {
@@ -201,6 +185,25 @@
       }
       showPage(currentPage);
     });
+
+    // Função para verificar e armazenar o token na URL
+    function handleAuthToken() {
+      const hash = window.location.hash;
+      if (hash) {
+        const params = new URLSearchParams(hash.substr(1));
+        const token = params.get('access_token');
+
+        if (token) {
+          localStorage.setItem(tokenKey, token);
+          // Limpa a URL para evitar loop de autenticação
+          window.history.replaceState(null, null, window.location.pathname);
+          showPage(currentPage);
+          loadTopArtists();
+          loadTopSongs();
+          loadTotalTime();
+        }
+      }
+    }
 
     // Função para carregar os Top 5 Artistas
     async function loadTopArtists() {
@@ -284,7 +287,11 @@
       }
     }
 
-    loginButton.addEventListener('click', loginSpotify);
+    // Verifica o token assim que a página carregar
+    window.onload = handleAuthToken;
+    
+    // Inicia a primeira página
+    showPage(0);
   </script>
 </body>
 </html>
