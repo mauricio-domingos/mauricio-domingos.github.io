@@ -1,44 +1,262 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Retrospectiva Spotify</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retrospectiva 2024 - ARUPlay</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .wrapper {
+      width: 360px; /* 9:16 aspect ratio */
+      height: 640px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .page.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Imagens de fundo específicas para cada página */
+    .page1 {
+      background-image: url('https://via.placeholder.com/360x640/1db954/ffffff?text=Bem-vindo');
+    }
+
+    .page2 {
+      background-image: url('https://via.placeholder.com/360x640/ff6f61/ffffff?text=Top+5+Artistas');
+    }
+
+    .page3 {
+      background-image: url('https://via.placeholder.com/360x640/4a90e2/ffffff?text=Top+5+Músicas');
+    }
+
+    .page4 {
+      background-image: url('https://via.placeholder.com/360x640/f5a623/ffffff?text=Tempo+Total+Ouvido');
+    }
+
+    .page5 {
+      background-image: url('https://via.placeholder.com/360x640/50e3c2/ffffff?text=Obrigado');
+    }
+
+    #nextButton {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1db954;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s, opacity 0.5s ease;
+    }
+
+    #nextButton:hover {
+      background-color: #1ed760;
+    }
+
+    #nextButton.hidden {
+      opacity: 0;
+      pointer-events: none; /* Impede interação quando escondido */
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      font-size: 16px;
+    }
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="page" id="page1">
-            <h1>🎶 Sua Retrospectiva 2024</h1>
-            <p>O que você mais ouviu esse ano? Vamos ver!</p>
-            <button class="next-btn" onclick="loginSpotify()">Login com Spotify</button>
-        </div>
-
-        <div class="page" id="page2">
-            <h2>Top 5 Artistas</h2>
-            <ul id="top-artists"></ul>
-            <button class="next-btn" onclick="nextPage(3)">Top 5 Músicas</button>
-        </div>
-
-        <div class="page" id="page3">
-            <h2>Top 5 Músicas</h2>
-            <ul id="top-songs"></ul>
-            <button class="next-btn" onclick="nextPage(4)">Veja o Gráfico de Gêneros</button>
-        </div>
-
-        <div class="page" id="page4">
-            <h2>Seus Gêneros Favoritos</h2>
-            <div id="genre-graph"></div>
-            <button class="next-btn" onclick="nextPage(5)">Feliz 2024!</button>
-        </div>
-
-        <div class="page" id="page5">
-            <h2>Obrigado por usar o Spotify!</h2>
-            <p>Continue a explorar sua música favorita!</p>
-            <button class="next-btn" onclick="nextPage(1)">Voltar ao Início</button>
-        </div>
+  <div class="wrapper">
+    <div class="page page1 active">
+      <h1>Bem-vindo à retrospectiva 2024!</h1>
+      <p>Vamos relembrar os momentos incríveis do ano no ARUPlay.</p>
     </div>
+    <div class="page page2">
+      <h1>Top 5 Artistas:</h1>
+      <ul id="top-artists">
+        <!-- Artistas irão aparecer aqui -->
+      </ul>
+    </div>
+    <div class="page page3">
+      <h1>Top 5 Músicas:</h1>
+      <ul id="top-songs">
+        <!-- Músicas irão aparecer aqui -->
+      </ul>
+    </div>
+    <div class="page page4">
+      <h1>Tempo Total Ouvido:</h1>
+      <p id="total-time">Carregando...</p>
+    </div>
+    <div class="page page5">
+      <h1>Obrigado por acompanhar conosco!</h1>
+      <p>Nos vemos em 2025!</p>
+    </div>
+    <button id="nextButton">Próximo</button>
+  </div>
 
-    <script src="script.js"></script>
+  <script>
+    const pages = document.querySelectorAll('.page');
+    const nextButton = document.getElementById('nextButton');
+    const topArtistsList = document.getElementById('top-artists');
+    const topSongsList = document.getElementById('top-songs');
+    const totalTime = document.getElementById('total-time');
+    let currentPage = 0;
+    let token = '';
+
+    // Função de login e obtenção do token do Spotify
+    function loginSpotify() {
+      const authEndpoint = 'https://accounts.spotify.com/authorize';
+      const clientId = 'YOUR_SPOTIFY_CLIENT_ID'; // Substitua pelo seu Client ID
+      const redirectUri = 'YOUR_REDIRECT_URI'; // Substitua pelo seu Redirect URI
+      const authUrl = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read`;
+
+      window.location.href = authUrl;
+    }
+
+    // Função para recuperar o token da URL
+    window.onload = () => {
+      if (window.location.hash) {
+        const params = new URLSearchParams(window.location.hash.substr(1));
+        token = params.get('access_token');
+        if (token) {
+          showPage(currentPage);
+          loadTopArtists();
+          loadTopSongs();
+          loadTotalTime();
+        }
+      }
+    };
+
+    // Função para exibir uma página
+    function showPage(index) {
+      pages.forEach((page, i) => {
+        page.classList.remove('active');
+        if (i === index) {
+          page.classList.add('active');
+        }
+      });
+
+      // Esconde o botão "Próximo" na última página
+      if (index === pages.length - 1) {
+        nextButton.classList.add('hidden');
+      } else {
+        nextButton.classList.remove('hidden');
+      }
+    }
+
+    // Função para avançar entre as páginas
+    nextButton.addEventListener('click', () => {
+      currentPage++;
+      if (currentPage >= pages.length) {
+        currentPage = 0; // Volta para a primeira página (opcional)
+      }
+      showPage(currentPage);
+    });
+
+    // Função para carregar os Top 5 Artistas
+    async function loadTopArtists() {
+      const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        const artists = data.items;
+
+        artists.forEach(artist => {
+          const li = document.createElement('li');
+          li.textContent = artist.name;
+          topArtistsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar os artistas:', error);
+      }
+    }
+
+    // Função para carregar os Top 5 Músicas
+    async function loadTopSongs() {
+      const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=5';
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        const songs = data.items;
+
+        songs.forEach(song => {
+          const li = document.createElement('li');
+          li.textContent = song.name;
+          topSongsList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar as músicas:', error);
+      }
+    }
+
+    // Função para carregar o tempo total ouvido
+    async function loadTotalTime() {
+      const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5'; // Apenas para obter o tempo de reprodução
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        const totalMinutes = data.items.reduce((total, artist) => total + artist.popularity, 0);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        totalTime.textContent = `${hours} horas e ${minutes} minutos`;
+      } catch (error) {
+        console.error('Erro ao carregar o tempo de reprodução:', error);
+      }
+    }
+
+    // Iniciar o login do Spotify
+    loginSpotify();
+  </script>
 </body>
 </html>
