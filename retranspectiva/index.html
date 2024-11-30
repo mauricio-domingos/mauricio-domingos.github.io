@@ -66,11 +66,6 @@
     a:hover {
       transform: scale(1.1);
     }
-
-    #sirv-image {
-      margin-top: 20px;
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -85,15 +80,16 @@
     
     <h1>Top 5 Artistas</h1>
     <ul id="top-artists"></ul>
+    
     <h1>Top 5 Músicas</h1>
     <ul id="top-songs"></ul>
+    
+    <h1>Sua Playlist - Músicas Mais Ouvidas</h1>
+    <ul id="top-tracks"></ul>
+
     <h1>Pontuação Musical</h1>
     <p id="music-score">Carregando...</p>
     <p id="custom-message">Aguardando seus dados...</p>
-    
-    <!-- Área para exibir a imagem gerada com a pontuação -->
-    <img id="sirv-image" src="" alt="Imagem com a pontuação">
-    <a id="download-link" href="" download style="color: white;">Baixar Imagem</a>
   </div>
 
   <script>
@@ -104,13 +100,10 @@
     const content = document.getElementById('content');
     const userName = document.getElementById('user-name');
     const userImage = document.getElementById('user-image');
-    const musicScoreElement = document.getElementById('music-score');
-    const sirvImage = document.getElementById('sirv-image');
-    const downloadLink = document.getElementById('download-link');
-
+    
     // Função para login com Spotify
     function loginSpotify() {
-      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
+      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private user-library-read`;
       window.location.href = authUrl;
     }
 
@@ -133,6 +126,7 @@
           loadUserData();
           loadTopArtists();
           loadTopSongs();
+          loadTopTracks(); // Carrega as músicas mais ouvidas
           calculateMusicScore();
         }
       }
@@ -213,7 +207,34 @@
       }
     }
 
-    // Calcula e exibe a pontuação musical e gera a imagem
+    // Carrega as 10 músicas mais ouvidas do usuário
+    async function loadTopTracks() {
+      const token = localStorage.getItem(tokenKey);
+      const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=10';
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const tracks = data.items;
+        const topTracksList = document.getElementById('top-tracks');
+        tracks.forEach(track => {
+          const li = document.createElement('li');
+          // Cria um link para a música mais ouvida no Spotify
+          const trackLink = document.createElement('a');
+          trackLink.href = track.external_urls.spotify;  // Link para a música
+          trackLink.target = '_blank';  // Abre o link em uma nova aba
+          trackLink.textContent = `${track.name} - ${track.artists.map(artist => artist.name).join(', ')}`;
+          li.appendChild(trackLink);  // Adiciona o link à lista
+          topTracksList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar as músicas mais ouvidas:', error);
+      }
+    }
+
+    // Calcula e exibe a pontuação musical
     async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -224,23 +245,15 @@
         });
         const data = await response.json();
         const artists = data.items;
+        let score = 0;
+        
+        artists.forEach(artist => {
+          // Aumenta a pontuação com base na popularidade do artista
+          score += artist.popularity;
+        });
 
-        // Calcula a pontuação musical com base na popularidade dos artistas
-        let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
-
-        // Exibe a pontuação musical
-        musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
-
-        // Geração da imagem com a pontuação no Sirv
-        const formattedScore = musicScore < 10 ? `0${musicScore}` : musicScore;
-        const imageUrl = `https://troseedi.sirv.com/Novo%20Projeto%20(79).png?text.0.text=${formattedScore}&text.0.position.gravity=center&text.0.size=50&text.0.color=ffffff&text.0.font.family=Montserrat`;
-
-        // Exibe a imagem gerada
-        sirvImage.src = imageUrl;
-        sirvImage.style.display = 'block';
-
-        // Configura o link para download da imagem
-        downloadLink.href = imageUrl;
+        // Exibe a pontuação
+        document.getElementById('music-score').textContent = `Sua Pontuação Musical: ${score}`;
 
       } catch (error) {
         console.error('Erro ao calcular a pontuação musical:', error);
