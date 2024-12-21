@@ -65,6 +65,14 @@
       margin: 10px 0;
     }
 
+    .artist-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 10px 0;
+    }
+
     .controls {
       position: absolute;
       bottom: 20px;
@@ -99,21 +107,34 @@
     </div>
     <div class="slide" id="slide-2">
       <div class="slide-content">
-        <h1>Top 5 Artistas</h1>
-        <ul id="top-artists"></ul>
+        <h1>Seu Artista Mais Ouvido</h1>
+        <img id="top-artist-photo" class="artist-photo" src="" alt="Foto do artista">
+        <p id="top-artist-name">Carregando...</p>
       </div>
     </div>
     <div class="slide" id="slide-3">
+      <div class="slide-content">
+        <h1>O Resto do Top 5 Artistas</h1>
+        <ul id="rest-top-artists"></ul>
+      </div>
+    </div>
+    <div class="slide" id="slide-4">
       <div class="slide-content">
         <h1>Top 5 Músicas</h1>
         <ul id="top-songs"></ul>
       </div>
     </div>
-    <div class="slide" id="slide-4">
+    <div class="slide" id="slide-5">
       <div class="slide-content">
         <h1>Sua Pontuação Musical</h1>
         <p id="music-score">Carregando...</p>
         <p id="custom-message">Aguardando seus dados...</p>
+      </div>
+    </div>
+    <div class="slide" id="slide-6">
+      <div class="slide-content">
+        <h1>Obrigado por participar!</h1>
+        <p>Esperamos que você tenha gostado da sua reTRANSpectiva 2024!</p>
       </div>
     </div>
   </div>
@@ -169,11 +190,19 @@
         });
         const data = await response.json();
         const artists = data.items;
-        const topArtistsList = document.getElementById('top-artists');
-        artists.forEach(artist => {
+
+        // Artista mais ouvido
+        const topArtistPhoto = document.getElementById('top-artist-photo');
+        const topArtistName = document.getElementById('top-artist-name');
+        topArtistPhoto.src = artists[0].images[0].url;
+        topArtistName.textContent = artists[0].name;
+
+        // Resto do Top 5
+        const restTopArtists = document.getElementById('rest-top-artists');
+        artists.slice(1).forEach(artist => {
           const li = document.createElement('li');
-          li.textContent = artist.name;
-          topArtistsList.appendChild(li);
+          li.innerHTML = `<img class="artist-photo" src="${artist.images[0].url}" alt="Foto do artista"> ${artist.name}`;
+          restTopArtists.appendChild(li);
         });
       } catch (error) {
         console.error('Erro ao carregar os artistas:', error);
@@ -211,57 +240,30 @@
         });
         const data = await response.json();
         const artists = data.items;
-
-        // Calcula a pontuação musical com base na popularidade dos artistas
-        let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
-
+        // Calculando a pontuação musical
+        const musicScore = artists.reduce((total, artist, index) => total + (5 - index), 0);
+        
         const musicScoreElement = document.getElementById('music-score');
-        musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
+        musicScoreElement.textContent = `Sua pontuação musical: ${musicScore}`;
 
-        const customMessage = document.getElementById('custom-message');
-        if (musicScore < 50) {
-          customMessage.textContent = `Você está começando agora! Aumente sua pontuação ouvindo mais música!`;
-        } else if (musicScore >= 50 && musicScore < 150) {
-          customMessage.textContent = `Ótima pontuação! Continue explorando novos artistas!`;
-        } else if (musicScore >= 150 && musicScore < 300) {
-          customMessage.textContent = `Sua pontuação é impressionante! Você já é um verdadeiro fã de música!`;
+        // Mensagem personalizada com base na pontuação
+        const customMessageElement = document.getElementById('custom-message');
+        if (musicScore >= 20) {
+          customMessageElement.textContent = 'Você é um verdadeiro fã de música!';
+        } else if (musicScore >= 15) {
+          customMessageElement.textContent = 'Você tem um gosto musical bem eclético!';
         } else {
-          customMessage.textContent = `Você é um expert musical! Sua pontuação é de outro nível!`;
+          customMessageElement.textContent = 'Parece que você ainda está descobrindo novos sons!';
         }
       } catch (error) {
         console.error('Erro ao calcular a pontuação musical:', error);
       }
     }
 
-    // Inicializa os dados reais
-    window.onload = () => {
-      const token = localStorage.getItem(tokenKey);
-      if (token) {
-        loadTopArtists();
-        loadTopSongs();
-        calculateMusicScore
-        calculateMusicScore();
-      } else {
-        console.error('Token não encontrado. Redirecionando para autenticação...');
-        window.location.href = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user-top-read`;
-      }
-    };
-
-    // Obtém o token do URL após autenticação e salva no localStorage
-    function saveTokenFromUrl() {
-      const hash = window.location.hash;
-      if (hash) {
-        const params = new URLSearchParams(hash.substring(1));
-        const token = params.get('access_token');
-        if (token) {
-          localStorage.setItem(tokenKey, token);
-          window.location.hash = ''; // Limpa o hash da URL
-          window.location.reload(); // Recarrega para inicializar os dados
-        }
-      }
-    }
-
-    saveTokenFromUrl();
+    // Chama as funções para carregar os dados ao iniciar
+    loadTopArtists();
+    loadTopSongs();
+    calculateMusicScore();
   </script>
 </body>
 </html>
