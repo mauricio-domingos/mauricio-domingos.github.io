@@ -9,145 +9,156 @@
       font-family: 'Montserrat', sans-serif;
       background: black;
       color: white;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .slide-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      color: white;
+      transition: left 0.5s ease-in-out;
+    }
+
+    .slide.active {
+      left: 0;
+    }
+
+    .slide.previous {
+      left: -100%;
+    }
+
+    .slide-content {
       text-align: center;
       padding: 20px;
     }
 
-    #loginButton {
-      background-color: #1db954;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 50px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    .slide-content h1 {
+      font-size: 36px;
     }
 
-    #loginButton:hover {
-      background-color: #1ed760;
-    }
-
-    #content {
-      margin-top: 20px;
-    }
-
-    #content h1 {
-      font-size: 24px;
-    }
-
-    #content ul {
-      list-style-type: none;
+    .slide-content ul {
+      list-style: none;
       padding: 0;
+      font-size: 20px;
     }
 
-    #content li {
-      font-size: 18px;
+    .slide-content ul li {
+      margin: 10px 0;
     }
 
-    #user-profile {
-      margin-bottom: 20px;
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
     }
 
-    #user-profile img {
+    .control-btn {
+      width: 15px;
+      height: 15px;
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
+      background: #444;
+      cursor: pointer;
+      transition: background 0.3s;
     }
 
-    /* Efeito de escala ao passar o mouse */
-    a {
-      text-decoration: none;
-      color: white;
-      transition: transform 0.2s ease;
-    }
-
-    a:hover {
-      transform: scale(1.1);
+    .control-btn.active {
+      background: #1db954;
     }
   </style>
 </head>
 <body>
 
-  <button id="loginButton">Entrar com Spotify</button>
-
-  <div id="content" style="display: none;">
-    <div id="user-profile">
-      <img id="user-image" src="" alt="Foto do perfil">
-      <p id="user-name">Olá, Carregando...</p>
+  <div class="slide-container">
+    <div class="slide active" id="slide-1">
+      <div class="slide-content">
+        <h1>Bem-vindo à sua reTRANSpectiva 2024!</h1>
+        <p>Vamos descobrir seus destaques musicais do ano.</p>
+      </div>
     </div>
-    
-    <h1>Top 5 Artistas</h1>
-    <ul id="top-artists"></ul>
-    <h1>Top 5 Músicas</h1>
-    <ul id="top-songs"></ul>
-    <h1>Pontuação Musical</h1>
-    <p id="music-score">Carregando...</p>
-    <p id="custom-message">Aguardando seus dados...</p>
+    <div class="slide" id="slide-2">
+      <div class="slide-content">
+        <h1>Top 5 Artistas</h1>
+        <ul id="top-artists"></ul>
+      </div>
+    </div>
+    <div class="slide" id="slide-3">
+      <div class="slide-content">
+        <h1>Top 5 Músicas</h1>
+        <ul id="top-songs"></ul>
+      </div>
+    </div>
+    <div class="slide" id="slide-4">
+      <div class="slide-content">
+        <h1>Sua Pontuação Musical</h1>
+        <p id="music-score">Carregando...</p>
+        <p id="custom-message">Aguardando seus dados...</p>
+      </div>
+    </div>
   </div>
 
+  <div class="controls" id="controls"></div>
+
   <script>
+    const slides = document.querySelectorAll('.slide');
+    const controls = document.getElementById('controls');
+    let currentSlide = 0;
+
+    // Criação dos botões de controle
+    slides.forEach((_, index) => {
+      const btn = document.createElement('div');
+      btn.classList.add('control-btn');
+      if (index === 0) btn.classList.add('active');
+      btn.addEventListener('click', () => goToSlide(index));
+      controls.appendChild(btn);
+    });
+
+    const controlButtons = document.querySelectorAll('.control-btn');
+
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      controlButtons[currentSlide].classList.remove('active');
+
+      currentSlide = index;
+
+      slides[currentSlide].classList.add('active');
+      controlButtons[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+      const nextIndex = (currentSlide + 1) % slides.length;
+      goToSlide(nextIndex);
+    }
+
+    // Troca de slides automaticamente a cada 5 segundos
+    setInterval(nextSlide, 5000);
+
     const clientId = 'b790c3434bc7438db724f334b4d3ac78'; 
     const redirectUri = 'https://mauricio-domingos.github.io/retranspectiva';
     const tokenKey = 'spotify_token';
-    const loginButton = document.getElementById('loginButton');
-    const content = document.getElementById('content');
-    const userName = document.getElementById('user-name');
-    const userImage = document.getElementById('user-image');
-    
-    // Função para login com Spotify
-    function loginSpotify() {
-      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=user-top-read user-read-private`;
-      window.location.href = authUrl;
-    }
 
-    // Função para deslogar
-    function logoutSpotify() {
-      localStorage.removeItem(tokenKey);
-      window.location.reload(); // Recarrega a página
-    }
-
-    // Verifica e armazena o token da URL
-    function handleAuthToken() {
-      const hash = window.location.hash;
-      if (hash) {
-        const params = new URLSearchParams(hash.substr(1));
-        const token = params.get('access_token');
-
-        if (token) {
-          localStorage.setItem(tokenKey, token);
-          window.history.replaceState(null, null, window.location.pathname); // Limpa a URL
-          loadUserData();
-          loadTopArtists();
-          loadTopSongs();
-          calculateMusicScore();
-        }
-      }
-    }
-
-    // Carrega os dados do usuário (nome e foto de perfil)
-    async function loadUserData() {
-      const token = localStorage.getItem(tokenKey);
-      const apiUrl = 'https://api.spotify.com/v1/me';
-
-      try {
-        const response = await fetch(apiUrl, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
-        const user = data;
-        
-        // Exibe nome e foto do perfil
-        userName.textContent = `Olá, ${user.display_name}!`;
-        userImage.src = user.images[0]?.url || 'https://via.placeholder.com/80'; // Foto de perfil, com imagem padrão caso não tenha
-
-      } catch (error) {
-        console.error('Erro ao carregar os dados do usuário:', error);
-      }
-    }
-
-    // Carrega os Top 5 Artistas
+    // Funções para carregar dados reais da API do Spotify
     async function loadTopArtists() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -161,12 +172,7 @@
         const topArtistsList = document.getElementById('top-artists');
         artists.forEach(artist => {
           const li = document.createElement('li');
-          // Cria um link para o perfil do artista no Spotify
-          const artistLink = document.createElement('a');
-          artistLink.href = artist.external_urls.spotify;  // Link para o perfil do artista
-          artistLink.target = '_blank';  // Abre o link em uma nova aba
-          artistLink.textContent = artist.name;  // Nome do artista
-          li.appendChild(artistLink);  // Adiciona o link à lista
+          li.textContent = artist.name;
           topArtistsList.appendChild(li);
         });
       } catch (error) {
@@ -174,7 +180,6 @@
       }
     }
 
-    // Carrega os Top 5 Músicas
     async function loadTopSongs() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/tracks?limit=5';
@@ -188,12 +193,7 @@
         const topSongsList = document.getElementById('top-songs');
         songs.forEach(song => {
           const li = document.createElement('li');
-          // Cria um link para a música no Spotify
-          const songLink = document.createElement('a');
-          songLink.href = song.external_urls.spotify;  // Link para a música
-          songLink.target = '_blank';  // Abre o link em uma nova aba
-          songLink.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
-          li.appendChild(songLink);  // Adiciona o link à lista
+          li.textContent = `${song.name} - ${song.artists.map(artist => artist.name).join(', ')}`;
           topSongsList.appendChild(li);
         });
       } catch (error) {
@@ -201,7 +201,6 @@
       }
     }
 
-    // Calcula e exibe a pontuação musical
     async function calculateMusicScore() {
       const token = localStorage.getItem(tokenKey);
       const apiUrl = 'https://api.spotify.com/v1/me/top/artists?limit=5';
@@ -216,7 +215,6 @@
         // Calcula a pontuação musical com base na popularidade dos artistas
         let musicScore = artists.reduce((sum, artist) => sum + artist.popularity, 0);
 
-        // Exibe a pontuação musical
         const musicScoreElement = document.getElementById('music-score');
         musicScoreElement.textContent = `Sua pontuação musical é: ${musicScore}`;
 
@@ -235,34 +233,35 @@
       }
     }
 
-    // Função para exibir ou esconder o conteúdo baseado no login
-    function updateContent() {
+    // Inicializa os dados reais
+    window.onload = () => {
       const token = localStorage.getItem(tokenKey);
       if (token) {
-        loginButton.textContent = 'Sair do Spotify';
-        content.style.display = 'block';
+        loadTopArtists();
+        loadTopSongs();
+        calculateMusicScore
+        calculateMusicScore();
       } else {
-        loginButton.textContent = 'Entrar com Spotify';
-        content.style.display = 'none';
+        console.error('Token não encontrado. Redirecionando para autenticação...');
+        window.location.href = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user-top-read`;
+      }
+    };
+
+    // Obtém o token do URL após autenticação e salva no localStorage
+    function saveTokenFromUrl() {
+      const hash = window.location.hash;
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        if (token) {
+          localStorage.setItem(tokenKey, token);
+          window.location.hash = ''; // Limpa o hash da URL
+          window.location.reload(); // Recarrega para inicializar os dados
+        }
       }
     }
 
-    // Configura o botão de login/logout
-    loginButton.addEventListener('click', () => {
-      const token = localStorage.getItem(tokenKey);
-      if (token) {
-        logoutSpotify();
-      } else {
-        loginSpotify();
-      }
-    });
-
-    // Verifica o token assim que a página for carregada
-    window.onload = () => {
-      handleAuthToken();
-      updateContent();
-    };
+    saveTokenFromUrl();
   </script>
-
 </body>
 </html>
