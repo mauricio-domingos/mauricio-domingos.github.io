@@ -1,0 +1,13 @@
+{
+    "name": "eleicoes",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+      "dev": "vercel dev",
+      "start": "vercel start"
+    },
+    "dependencies": {
+      "vercel": "^29.0.0"
+    }
+  }
+  
