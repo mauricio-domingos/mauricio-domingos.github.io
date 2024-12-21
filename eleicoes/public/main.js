@@ -1,4 +1,4 @@
-const BASE_URL = "https://seu-projeto.vercel.app/api"; // Substitua pelo link do seu projeto Vercel
+const BASE_URL = "https://mauricio-domingos-github-io.vercel.app/eleicoes/api"; // Substitua pelo link do seu projeto Vercel
 
 // Função para buscar votos
 async function fetchVotes() {
