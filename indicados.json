@@ -1,0 +1,102 @@
+{
+    "categories": [
+        {
+            "category": "Best International Feature Film",
+            "nominees": [
+                {
+                    "name": "Ainda Estou Aqui - Brasil",
+                    "winner": false
+                },
+                {
+                    "name": "A Garota da Agulha - Dinamarca",
+                    "winner": false
+                },
+                {
+                    "name": "Emilia Pérez - França",
+                    "winner": false
+                },
+                {
+                    "name": "A Semente do Fruto Sagrado - Alemanha",
+                    "winner": false
+                },
+                {
+                    "name": "Flow - Letônia",
+                    "winner": false
+                }
+            ],
+            "announcing": false
+        },
+        {
+            "category": "Best Performance by an Actress in a Leading Role",
+            "nominees": [
+                {
+                    "name": "Cynthia Erivo - Wicked",
+                    "winner": false
+                },
+                {
+                    "name": "Karla Sofía Gascón - Emilia Pérez",
+                    "winner": false
+                },
+                {
+                    "name": "Mikey Madison - Anora",
+                    "winner": false
+                },
+                {
+                    "name": "Demi Moore - A Substância",
+                    "winner": false
+                },
+                {
+                    "name": "Fernanda Torres - Ainda Estou Aqui",
+                    "winner": false
+                }
+            ],
+            "announcing": false
+        },
+        {
+            "category": "Academy Award for Best Picture",
+            "nominees": [
+                {
+                    "name": "Anora",
+                    "winner": false
+                },
+                {
+                    "name": "O Brutalista",
+                    "winner": false
+                },
+                {
+                    "name": "Um Completo Desconhecido",
+                    "winner": false
+                },
+                {
+                    "name": "Conclave",
+                    "winner": false
+                },
+                {
+                    "name": "Duna: Parte Dois",
+                    "winner": false
+                },
+                {
+                    "name": "Emilia Pérez",
+                    "winner": false
+                },
+                {
+                    "name": "Ainda Estou Aqui",
+                    "winner": false
+                },
+                {
+                    "name": "Nickel Boys",
+                    "winner": false
+                },
+                {
+                    "name": "A Substância",
+                    "winner": false
+                },
+                {
+                    "name": "Wicked",
+                    "winner": false
+                }
+            ],
+            "announcing": false
+        }
+    ]
+}
