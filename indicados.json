@@ -5,7 +5,7 @@
             "nominees": [
                 {
                     "name": "Ainda Estou Aqui - Brasil",
-                    "winner": false
+                    "winner": true
                 },
                 {
                     "name": "A Garota da Agulha - Dinamarca",
@@ -47,7 +47,7 @@
                 },
                 {
                     "name": "Fernanda Torres - Ainda Estou Aqui",
-                    "winner": false
+                    "winner": true
                 }
             ],
             "announcing": false
@@ -81,7 +81,7 @@
                 },
                 {
                     "name": "Ainda Estou Aqui",
-                    "winner": false
+                    "winner": true
                 },
                 {
                     "name": "Nickel Boys",
