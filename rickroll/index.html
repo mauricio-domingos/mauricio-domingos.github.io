@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Rick Roll</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input, button { margin: 10px; padding: 10px; font-size: 16px; }
+        #resultado { font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Detector de Rick Roll</h1>
+    <p>Cole o link do vídeo do YouTube para verificar se é um Rick Roll.</p>
+    <input type="text" id="videoUrl" placeholder="Cole o link aqui...">
+    <button onclick="verificarRickRoll()">Verificar</button>
+    <p id="resultado"></p>
+
+    <script>
+        const API_KEY = "AIzaSyDzrs44LpPpZrWIM3o898j9kSVWIerA1lU";
+
+        function extrairVideoId(url) {
+            const match = url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([\w-]+)/);
+            return match ? match[1] : null;
+        }
+
+        async function verificarRickRoll() {
+            const url = document.getElementById("videoUrl").value;
+            const videoId = extrairVideoId(url);
+            if (!videoId) {
+                document.getElementById("resultado").innerText = "❌ Link inválido!";
+                return;
+            }
+
+            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails&key=${API_KEY}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            if (!data.items || data.items.length === 0) {
+                document.getElementById("resultado").innerText = "❌ Vídeo não encontrado!";
+                return;
+            }
+
+            const video = data.items[0];
+            const title = video.snippet.title.toLowerCase();
+            const description = video.snippet.description.toLowerCase();
+            const publishDate = video.snippet.publishedAt;
+
+            if (videoId === "dQw4w9WgXcQ" || 
+                title.includes("rickroll") ||
+                description.includes("rickroll") ||
+                title.includes("never gonna give you up") ||
+                publishDate.startsWith("2009-07-17")) {
+                document.getElementById("resultado").innerText = "⚠️ Esse vídeo é um Rick Roll!";
+            } else {
+                document.getElementById("resultado").innerText = "✅ Esse vídeo parece seguro.";
+            }
+        }
+    </script>
+</body>
+</html>
