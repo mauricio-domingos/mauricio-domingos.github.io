@@ -5,17 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detector de Rick Roll</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input, button { margin: 10px; padding: 10px; font-size: 16px; }
-        #resultado { font-weight: bold; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #resultado {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .video-info {
+            margin-top: 20px;
+            display: none;
+        }
+        .video-info img {
+            width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <h1>Detector de Rick Roll</h1>
-    <p>Cole o link do vídeo do YouTube para verificar se é um Rick Roll.</p>
-    <input type="text" id="videoUrl" placeholder="Cole o link aqui...">
-    <button onclick="verificarRickRoll()">Verificar</button>
-    <p id="resultado"></p>
+    <div class="container">
+        <h1>Detector de Rick Roll</h1>
+        <p>Cole o link do vídeo do YouTube para verificar se é um Rick Roll.</p>
+        <input type="text" id="videoUrl" placeholder="Cole o link aqui...">
+        <button onclick="verificarRickRoll()">Verificar</button>
+        <p id="resultado"></p>
+        <div id="videoInfo" class="video-info">
+            <h2 id="videoTitle"></h2>
+            <img id="videoThumbnail" src="" alt="Thumbnail do vídeo">
+            <p id="videoDescription"></p>
+            <p id="copyrightInfo"></p>
+        </div>
+    </div>
 
     <script>
         const API_KEY = "AIzaSyDzrs44LpPpZrWIM3o898j9kSVWIerA1lU";
@@ -30,26 +81,36 @@
             const videoId = extrairVideoId(url);
             if (!videoId) {
                 document.getElementById("resultado").innerText = "❌ Link inválido!";
+                document.getElementById("videoInfo").style.display = "none";
                 return;
             }
 
-            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails&key=${API_KEY}`;
+            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,status&key=${API_KEY}`;
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (!data.items || data.items.length === 0) {
                 document.getElementById("resultado").innerText = "❌ Vídeo não encontrado!";
+                document.getElementById("videoInfo").style.display = "none";
                 return;
             }
 
             const video = data.items[0];
-            const title = video.snippet.title.toLowerCase();
-            const description = video.snippet.description.toLowerCase();
+            const title = video.snippet.title;
+            const description = video.snippet.description;
+            const thumbnail = video.snippet.thumbnails.high.url;
             const publishDate = video.snippet.publishedAt;
+            const copyrightStatus = video.status.uploadStatus === "processed" && video.status.license ? video.status.license : "Desconhecido";
+
+            document.getElementById("videoTitle").innerText = title;
+            document.getElementById("videoThumbnail").src = thumbnail;
+            document.getElementById("videoDescription").innerText = description;
+            document.getElementById("videoInfo").style.display = "block";
+            document.getElementById("copyrightInfo").innerText = `⚖️ Status de Copyright: ${copyrightStatus}`;
 
             if (videoId === "dQw4w9WgXcQ" || 
-                title.includes("rickroll") ||
-                description.includes("rickroll") ||
-                title.includes("never gonna give you up") ||
+                title.toLowerCase().includes("rickroll") ||
+                description.toLowerCase().includes("rickroll") ||
+                title.toLowerCase().includes("never gonna give you up") ||
                 publishDate.startsWith("2009-07-17")) {
                 document.getElementById("resultado").innerText = "⚠️ Esse vídeo é um Rick Roll!";
             } else {
