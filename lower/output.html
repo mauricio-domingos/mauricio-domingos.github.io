@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <div id="simple" class="lower third">
+    <div class="box">
+      <div id="simple-title" class="title"></div>
+      <div id="simple-sub" class="subtitle"></div>
+    </div>
+  </div>
+
+  <div id="breaking" class="lower breaking">
+    <div class="box red">
+      <span class="label">BREAKING</span>
+      <span id="breaking-title"></span>
+    </div>
+  </div>
+
+  <div id="corner" class="lower corner">
+    <img id="corner-img" src="" alt="">
+    <div class="info">
+      <div id="corner-title" class="title"></div>
+      <div id="corner-sub" class="subtitle"></div>
+    </div>
+  </div>
+
+  <script>
+    const displays = {
+      simple: document.getElementById("simple"),
+      breaking: document.getElementById("breaking"),
+      corner: document.getElementById("corner"),
+    };
+
+    db.ref("lowerthird").on("value", (snap) => {
+      const data = snap.val();
+      if (!data) return;
+
+      Object.values(displays).forEach(el => el.style.display = "none");
+
+      if (data.tipo === "simple") {
+        document.getElementById("simple-title").textContent = data.titulo;
+        document.getElementById("simple-sub").textContent = data.subtitulo;
+        displays.simple.style.display = "block";
+      }
+
+      if (data.tipo === "breaking") {
+        document.getElementById("breaking-title").textContent = data.titulo;
+        displays.breaking.style.display = "block";
+      }
+
+      if (data.tipo === "corner") {
+        document.getElementById("corner-img").src = data.imagem || "";
+        document.getElementById("corner-title").textContent = data.titulo;
+        document.getElementById("corner-sub").textContent = data.subtitulo;
+        displays.corner.style.display = "block";
+      }
+
+      // Ocultar após 10s
+      setTimeout(() => {
+        Object.values(displays).forEach(el => el.style.display = "none");
+      }, 10000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Painel H2R Lower Third</title>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <h2>Selecionar Tipo</h2>
+  <select id="tipo">
+    <option value="simple">Simples</option>
+    <option value="breaking">Breaking News</option>
+    <option value="corner">Corner Box</option>
+  </select>
+
+  <h2>Conteúdo</h2>
+  <input id="titulo" placeholder="Título"><br>
+  <input id="subtitulo" placeholder="Subtítulo"><br>
+  <input id="imagem" placeholder="URL da imagem (opcional)"><br>
+
+  <button onclick="enviar()">Enviar</button>
+
+  <script>
+    function enviar() {
+      const tipo = document.getElementById('tipo').value;
+      const titulo = document.getElementById('titulo').value;
+      const subtitulo = document.getElementById('subtitulo').value;
+      const imagem = document.getElementById('imagem').value;
+
+      db.ref("lowerthird").set({
+        tipo, titulo, subtitulo, imagem,
+        timestamp: Date.now()
+      });
+    }
+  </script>
+</body>
+</html>
