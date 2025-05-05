@@ -1,69 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <meta charset="UTF-8">
+  <style>
+    body { margin: 0; background: transparent; font-family: sans-serif; }
+    .lower { display: none; position: absolute; color: white; animation: fade 0.5s; }
+
+    #simple { bottom: 50px; left: 50px; background: rgba(0,0,0,0.7); padding: 15px; border-left: 4px solid red; }
+    #breaking { top: 50px; left: 50px; background: red; padding: 15px; font-weight: bold; }
+    #corner { top: 20px; right: 20px; background: rgba(0,0,0,0.7); display: flex; align-items: center; padding: 10px; border-radius: 10px; }
+
+    #corner img { width: 60px; height: 60px; margin-right: 10px; object-fit: cover; }
+
+    @keyframes fade { from {opacity: 0} to {opacity: 1} }
+  </style>
 </head>
 <body>
-  <div id="simple" class="lower third">
-    <div class="box">
-      <div id="simple-title" class="title"></div>
-      <div id="simple-sub" class="subtitle"></div>
+  <div id="simple" class="lower">
+    <div id="simple-title" style="font-size: 24px; font-weight: bold;"></div>
+    <div id="simple-sub" style="font-size: 16px;"></div>
+  </div>
+
+  <div id="breaking" class="lower">
+    <span id="breaking-title"></span>
+  </div>
+
+  <div id="corner" class="lower">
+    <img id="corner-img" src="">
+    <div>
+      <div id="corner-title" style="font-size: 18px; font-weight: bold;"></div>
+      <div id="corner-sub" style="font-size: 14px;"></div>
     </div>
   </div>
 
-  <div id="breaking" class="lower breaking">
-    <div class="box red">
-      <span class="label">BREAKING</span>
-      <span id="breaking-title"></span>
-    </div>
-  </div>
-
-  <div id="corner" class="lower corner">
-    <img id="corner-img" src="" alt="">
-    <div class="info">
-      <div id="corner-title" class="title"></div>
-      <div id="corner-sub" class="subtitle"></div>
-    </div>
-  </div>
-
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
   <script>
-    const displays = {
-      simple: document.getElementById("simple"),
-      breaking: document.getElementById("breaking"),
-      corner: document.getElementById("corner"),
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XsiuV-BLF8kV-2_xg9y7rzRqoIUdPDA",
+      authDomain: "tvarublox.firebaseapp.com",
+      databaseURL: "https://tvarublox-default-rtdb.firebaseio.com",
+      projectId: "tvarublox",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const views = {
+      simple: document.getElementById('simple'),
+      breaking: document.getElementById('breaking'),
+      corner: document.getElementById('corner')
     };
 
-    db.ref("lowerthird").on("value", (snap) => {
+    function ocultarTodos() {
+      Object.values(views).forEach(v => v.style.display = "none");
+    }
+
+    db.ref("lowerthird").on("value", snap => {
+      ocultarTodos();
       const data = snap.val();
       if (!data) return;
-
-      Object.values(displays).forEach(el => el.style.display = "none");
 
       if (data.tipo === "simple") {
         document.getElementById("simple-title").textContent = data.titulo;
         document.getElementById("simple-sub").textContent = data.subtitulo;
-        displays.simple.style.display = "block";
-      }
-
-      if (data.tipo === "breaking") {
+        views.simple.style.display = "block";
+      } else if (data.tipo === "breaking") {
         document.getElementById("breaking-title").textContent = data.titulo;
-        displays.breaking.style.display = "block";
-      }
-
-      if (data.tipo === "corner") {
-        document.getElementById("corner-img").src = data.imagem || "";
+        views.breaking.style.display = "block";
+      } else if (data.tipo === "corner") {
+        document.getElementById("corner-img").src = data.imagem;
         document.getElementById("corner-title").textContent = data.titulo;
         document.getElementById("corner-sub").textContent = data.subtitulo;
-        displays.corner.style.display = "block";
+        views.corner.style.display = "flex";
       }
 
-      // Ocultar após 10s
-      setTimeout(() => {
-        Object.values(displays).forEach(el => el.style.display = "none");
-      }, 10000);
+      setTimeout(ocultarTodos, 10000);
     });
   </script>
 </body>

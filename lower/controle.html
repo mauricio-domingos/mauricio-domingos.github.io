@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Painel H2R Lower Third</title>
+  <meta charset="UTF-8">
+  <title>Painel de Controle</title>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
 </head>
 <body>
-  <h2>Selecionar Tipo</h2>
+  <h1>Lower Third</h1>
+
   <select id="tipo">
     <option value="simple">Simples</option>
-    <option value="breaking">Breaking News</option>
+    <option value="breaking">Breaking</option>
     <option value="corner">Corner Box</option>
-  </select>
+  </select><br><br>
 
-  <h2>Conteúdo</h2>
-  <input id="titulo" placeholder="Título"><br>
-  <input id="subtitulo" placeholder="Subtítulo"><br>
-  <input id="imagem" placeholder="URL da imagem (opcional)"><br>
+  <input id="titulo" placeholder="Título"><br><br>
+  <input id="subtitulo" placeholder="Subtítulo"><br><br>
+  <input id="imagem" placeholder="URL da imagem (para Corner Box)"><br><br>
 
   <button onclick="enviar()">Enviar</button>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XsiuV-BLF8kV-2_xg9y7rzRqoIUdPDA",
+      authDomain: "tvarublox.firebaseapp.com",
+      databaseURL: "https://tvarublox-default-rtdb.firebaseio.com",
+      projectId: "tvarublox",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     function enviar() {
       const tipo = document.getElementById('tipo').value;
       const titulo = document.getElementById('titulo').value;
@@ -29,7 +38,10 @@
       const imagem = document.getElementById('imagem').value;
 
       db.ref("lowerthird").set({
-        tipo, titulo, subtitulo, imagem,
+        tipo,
+        titulo,
+        subtitulo,
+        imagem,
         timestamp: Date.now()
       });
     }
